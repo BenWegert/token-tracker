@@ -52,13 +52,18 @@ const scanTx = async (hash) => {
 
   if (tx) {
     if (tx.to == null) {
-      var contractAddress =
+      const contractAddress =
         "0x" +
         web3.utils
           .sha3(RLP.encode([tx.from, tx.nonce]))
           .slice(12)
           .substring(14);
-      pendingTokens.set(hash, { contractAddress, attempts: 0 });
+
+      const balance = parseFloat(
+        web3.utils.fromWei((await web3.eth.getBalance(tx.from)) || "0", "ether")
+      ).toFixed(2);
+
+      pendingTokens.set(hash, { balance, contractAddress, attempts: 0 });
     }
   } else {
     var hashRetries = retries.get(hash);
@@ -79,7 +84,7 @@ const scanTx = async (hash) => {
 };
 
 const checkToken = async (hash) => {
-  var { contractAddress } = pendingTokens.get(hash);
+  var { contractAddress, balance } = pendingTokens.get(hash);
 
   try {
     var code = await web3.eth.getCode(contractAddress);
@@ -97,7 +102,7 @@ const checkToken = async (hash) => {
       ]);
 
       if (name && symbol) {
-        createMessage({ name, symbol, contractAddress });
+        createMessage({ name, symbol, contractAddress, balance });
       }
 
       pendingTokens.del(hash);
@@ -108,7 +113,7 @@ const checkToken = async (hash) => {
 };
 
 const createMessage = async (token) => {
-  var message = `<b>${token.name} (${token.symbol})</b> has been deployed\r\n<a href="https://etherscan.io/address/${token.contractAddress}">details</a>`;
+  var message = `Address with balance of <b>${token.balance} ETH</b> deployed <b>${token.name} (${token.symbol})</b> has been deployed\r\n<a href="https://etherscan.io/address/${token.contractAddress}">details</a>`;
   log(message);
 };
 
