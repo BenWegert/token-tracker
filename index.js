@@ -113,7 +113,7 @@ const checkToken = async (hash) => {
 };
 
 const createMessage = async (token) => {
-  var message = `Address with balance of <b>${token.balance} ETH</b> deployed <b>${token.name} (${token.symbol})</b>\r\n<a href="https://etherscan.io/address/${token.contractAddress}">details</a>`;
+  var message = `<b>${token.name} (${token.symbol}) ${token.balance} ETH</b>\r\n<a href="https://etherscan.io/address/${token.contractAddress}">details</a>`;
   log(message);
 };
 
